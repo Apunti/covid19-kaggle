@@ -3,6 +3,7 @@ import json
 
 def create_html(res_dict, task, path_bert, path_word2vec, array_bert):
     answers_dict = {}
+    bert = False
     for n_question, question_dict in enumerate(res_dict[task]):
         answers_dict[n_question] = {}
         for n_subquestion, _ in enumerate(list(question_dict.values())[0]):
@@ -12,6 +13,7 @@ def create_html(res_dict, task, path_bert, path_word2vec, array_bert):
         for n_subquestion, subquestion in enumerate(list(question_dict.values())[0]):
             name = 'question_{}_'.format(n_question) + 'subquestion_{}'.format(n_subquestion)
             if n_question in array_bert:
+                bert = True
                 file = path_bert + name + '.json'
             else:
                 file = path_word2vec + name + '.json'
@@ -27,7 +29,7 @@ def create_html(res_dict, task, path_bert, path_word2vec, array_bert):
     for n_question, question_dict in enumerate(res_dict[task]):
         question = list(question_dict.keys())[0]
         subquestions = list(question_dict.values())[0]
-        html_string += create_question(question, subquestions, n_question, answers_dict)
+        html_string += create_question(question, subquestions, n_question, answers_dict, bert)
 
     html_string += '</ul></nav></body>'
 
@@ -37,40 +39,43 @@ def create_html(res_dict, task, path_bert, path_word2vec, array_bert):
     return html_string
 
 
-def create_question(question, subquestions, n_question, answers_dict):
+def create_question(question, subquestions, n_question, answers_dict, bert):
     new_question = '<li class="question-38e00bc3"><button class="accordeon-38e00bc3">'
     new_question += question
     new_question += '<div class="triangle-38e00bc3"></div></button><div class="panel-38e00bc3">' \
                     '<ul class="subquestions-wrapper-38e00bc3">'
     for n_subquestion, subquestion in enumerate(subquestions):
-        new_question += create_subquestion(subquestion, n_question, n_subquestion, answers_dict)
+        new_question += create_subquestion(subquestion, n_question, n_subquestion, answers_dict, bert)
 
     new_question += '</ul></div></li>'
 
     return new_question
 
 
-def create_subquestion(subquestion, n_question, n_subquestion, answers_dict):
+def create_subquestion(subquestion, n_question, n_subquestion, answers_dict, bert):
     new_subquestion = '<li class="subquestion-38e00bc3"><button class="accordeon-38e00bc3">'
     new_subquestion += subquestion
     new_subquestion += '<div class="triangle-38e00bc3"></div></button><div class="panel-38e00bc3 result-container-38e00bc3">'
 
     for element in answers_dict[n_question][n_subquestion]:
-        new_subquestion += create_element(element)
+        new_subquestion += create_element(element, bert)
 
     new_subquestion += '</div></li>'
 
     return new_subquestion
 
 
-def create_element(element):
+def create_element(element, bert):
     title = element['title']
     url = element['url']
     authors = element['authors']
     evidence = element['evidence']
     design = element['design']
     date = element['date']
-    sentences = element['sentences']
+    if bert:
+        sentences = element['sentences']
+    else:
+        sentences = [element['sentences']]
 
     new_element = '<div class="result-title-38e00bc3">' \
                   '<a href="' + url + '" target="_blank">' + title + '</a></div><p class="result-authors-38e00bc3">'
