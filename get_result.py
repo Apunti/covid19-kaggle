@@ -107,14 +107,14 @@ def remove_punct(text):
         new_words.append(w)
     return new_words
 
-def get_answers_files(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = None, inforet_sentence = None, only_top_doc = False, task = None, question = None, subquestion = None):
+def get_answers_files(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = None, inforet_sentence = None, only_top_doc = False, task = None, question = None, subquestion = None, method = 'BERT'):
     """
     'inforet_tuple' is a tuple (information_retrieval_type, information_retrieval_instance), eg:
         ('BERT', instance of 'FeatureExtractor' from 'extract_features_refactored.py' )
         ('TFIDF', instance 'Embedding_retrieval' from 'information_retrieval.py')
     """
     if not task is None:
-        directory = 'json_answers/task_{}/'.format(task)
+        directory = 'json_answers/' + method + '/task_{}/'.format(task)
     else:
         directory = 'json_answers/test/'
     if not os.path.exists(directory):
