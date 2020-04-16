@@ -97,7 +97,7 @@ def _read_file(json_file):
     return {'paper_id': paper_id, 'title': title, 'abstract': abstract, 'text': text}
 
 
-def save_dictionaries(df):
+def save_dictionaries(df, path = 'Data', stem_lema = False):
     """
     Calculates the dictionaries needed to compute TFIDF score and saves them.
         term_frequencies: dict of dicts of term frequencies within a document.
@@ -106,7 +106,7 @@ def save_dictionaries(df):
     The dictionaries will be stored in the directory Data/ranking_dict/
     """
 
-    directory = 'Data/ranking_dict/'
+    directory = path + '/ranking_dict/'
     if not os.path.exists(directory):
         os.makedirs(directory)
 
@@ -147,13 +147,13 @@ def save_dictionaries(df):
 
     # Save dictionaries into files
     print('Saving dictionaries v5...')
-    with open('Data/ranking_dict/document_frequencies_text_v5.p', 'wb') as fp:
+    with open(directory + '/document_frequencies_text_v5.p', 'wb') as fp:
         pickle.dump(document_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('Data/ranking_dict/term_frequencies_text_v5.p', 'wb') as fp:
+    with open(directory + '/term_frequencies_text_v5.p', 'wb') as fp:
         pickle.dump(term_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('Data/ranking_dict/document_length_text_v5.p', 'wb') as fp:
+    with open(directory + '/document_length_text_v5.p', 'wb') as fp:
         pickle.dump(document_length, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
     # REPEAT WITH ABSTRACTS
@@ -192,78 +192,78 @@ def save_dictionaries(df):
         term_frequencies[id] = actual_frequencies
 
     # Save dictionaries into files
-    with open('Data/ranking_dict/document_frequencies_abstract_v5.p', 'wb') as fp:
+    with open(directory + '/document_frequencies_abstract_v5.p', 'wb') as fp:
         pickle.dump(document_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('Data/ranking_dict/term_frequencies_abstract_v5.p', 'wb') as fp:
+    with open(directory + '/term_frequencies_abstract_v5.p', 'wb') as fp:
         pickle.dump(term_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('Data/ranking_dict/document_length_abstract_v5.p', 'wb') as fp:
+    with open(directory + '/document_length_abstract_v5.p', 'wb') as fp:
         pickle.dump(document_length, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
     # CREATE TEXT DICTIONARIES
+    if stem_lema == True:
+        term_frequencies = {}  # dict of dicts paper_id -> word -> frequency within a document
+        document_frequencies = {}  # dict word -> number of documents containing the term
+        document_length = {}  # dict paper_id -> document length
 
-    term_frequencies = {}  # dict of dicts paper_id -> word -> frequency within a document
-    document_frequencies = {}  # dict word -> number of documents containing the term
-    document_length = {}  # dict paper_id -> document length
+        stemmer = SnowballStemmer("english")
 
-    stemmer = SnowballStemmer("english")
+        for id in list(df.paper_id):
+            term_frequencies[id] = {}
+            document_length[id] = 0
 
-    for id in list(df.paper_id):
-        term_frequencies[id] = {}
-        document_length[id] = 0
-
-    print('Processing the corpus...\n')
-    for id, document in tqdm(zip(list(df.paper_id), list(df.text))):
-        actual_frequencies = {}
-        words_set = set()
-        length = 0
-        if type(document) != type('a'):
-            continue
-        for word in re.findall(r"[\w']+|[.,!?;]", document.strip()):
-            word = stemmer.stem(WordNetLemmatizer().lemmatize(word.lower(), pos='v'))
-            if word in string.punctuation:
+        print('Processing the corpus...\n')
+        for id, document in tqdm(zip(list(df.paper_id), list(df.text))):
+            actual_frequencies = {}
+            words_set = set()
+            length = 0
+            if type(document) != type('a'):
                 continue
-            length += 1
-            if word in actual_frequencies:
-                actual_frequencies[word] += 1
-            else:
-                actual_frequencies[word] = 1
-            words_set.add(word)
-        for word in words_set:
-            if word in document_frequencies:
-                document_frequencies[word] += 1
-            else:
-                document_frequencies[word] = 1
-        document_length[id] = length
-        term_frequencies[id] = actual_frequencies
+            for word in re.findall(r"[\w']+|[.,!?;]", document.strip()):
+                word = stemmer.stem(WordNetLemmatizer().lemmatize(word.lower(), pos='v'))
+                if word in string.punctuation:
+                    continue
+                length += 1
+                if word in actual_frequencies:
+                    actual_frequencies[word] += 1
+                else:
+                    actual_frequencies[word] = 1
+                words_set.add(word)
+            for word in words_set:
+                if word in document_frequencies:
+                    document_frequencies[word] += 1
+                else:
+                    document_frequencies[word] = 1
+            document_length[id] = length
+            term_frequencies[id] = actual_frequencies
 
-    # Save dictionaries into files
-    with open('Data/ranking_dict/document_frequencies_text_proc_v5.p', 'wb') as fp:
-        pickle.dump(document_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        # Save dictionaries into files
+        with open(directory + '/document_frequencies_text_proc_v5.p', 'wb') as fp:
+            pickle.dump(document_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('Data/ranking_dict/term_frequencies_text_proc_v5.p', 'wb') as fp:
-        pickle.dump(term_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(directory + '/term_frequencies_text_proc_v5.p', 'wb') as fp:
+            pickle.dump(term_frequencies, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('Data/ranking_dict/document_length_text_proc_v5.p', 'wb') as fp:
-        pickle.dump(document_length, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(directory + '/document_length_text_proc_v5.p', 'wb') as fp:
+            pickle.dump(document_length, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
-def read_new_files():
+def read_new_files(path = 'Data'):
     """
     Creates a dataframe with processed text and abstract from the json files.
     :return: dataframe with columns ['paper_id', 'title', 'abstract', 'text']
     """
     # Path to the metadata file
-    metadata_path = 'Data/metadata.csv'
+    metadata_path = path + '/metadata.csv'
 
     # Creates a dataframe with the needed columns
     df = pd.DataFrame(columns=['paper_id', 'title', 'abstract', 'text', 'date'])
 
     # Path to the directories with the json
-    bioarxiv_dir = 'Data/biorxiv_medrxiv/biorxiv_medrxiv'
-    comm_use_dir = 'Data/comm_use_subset/comm_use_subset'
-    custom_license_dir = 'Data/custom_license/custom_license'
-    noncomm_use_dir = 'Data/noncomm_use_subset/noncomm_use_subset'
+    bioarxiv_dir = path + '/biorxiv_medrxiv/biorxiv_medrxiv'
+    comm_use_dir = path + '/comm_use_subset/comm_use_subset'
+    custom_license_dir = path + '/custom_license/custom_license'
+    noncomm_use_dir = path + '/noncomm_use_subset/noncomm_use_subset'
 
     data_directories = {'biorxiv_medrxiv': bioarxiv_dir,
                         'comm_use_subset': comm_use_dir,
