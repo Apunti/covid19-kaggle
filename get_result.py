@@ -143,7 +143,10 @@ def get_answers_files(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = 
 
         # get 'topk' closest sentences/paragraphs
         if (inforet_type == 'BERT'):
-            similar_par = inforet.get_closest_sentence(bert_query, paper_id, row.text.values[0], par_k)
+            try:
+                similar_par = inforet.get_closest_sentence(bert_query, paper_id, row.text.values[0], par_k)
+            except:
+                continue
             top_paragraphs = ''
             for n_par in range(par_k):
                 if len(similar_par) < par_k:
