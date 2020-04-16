@@ -1,7 +1,7 @@
 import json
 
 
-def create_html(res_dict, task, path='../input/results-json/task_0/'):
+def create_html(res_dict, task, path_bert, path_word2vec, array_bert):
     answers_dict = {}
     for n_question, question_dict in enumerate(res_dict[task]):
         answers_dict[n_question] = {}
@@ -11,7 +11,10 @@ def create_html(res_dict, task, path='../input/results-json/task_0/'):
     for n_question, question_dict in enumerate(res_dict[task]):
         for n_subquestion, subquestion in enumerate(list(question_dict.values())[0]):
             name = 'question_{}_'.format(n_question) + 'subquestion_{}'.format(n_subquestion)
-            file = path + name + '.json'
+            if n_question in array_bert:
+                file = path_bert + name + '.json'
+            else:
+                file = path_word2vec + name + '.json'
 
             with open(file) as f:
                 answers_dict[n_question][n_subquestion] = json.load(f)
