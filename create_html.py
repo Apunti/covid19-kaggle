@@ -3,13 +3,14 @@ import json
 
 def create_html(res_dict, task, path_bert, path_word2vec, array_bert):
     answers_dict = {}
-    bert = False
+    
     for n_question, question_dict in enumerate(res_dict[task]):
         answers_dict[n_question] = {}
         for n_subquestion, _ in enumerate(list(question_dict.values())[0]):
             answers_dict[n_question][n_subquestion] = 0
 
     for n_question, question_dict in enumerate(res_dict[task]):
+        bert = False
         for n_subquestion, subquestion in enumerate(list(question_dict.values())[0]):
             name = 'question_{}_'.format(n_question) + 'subquestion_{}'.format(n_subquestion)
             if n_question in array_bert:
