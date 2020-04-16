@@ -10,6 +10,7 @@ def create_html(res_dict, task, path_bert, path_word2vec, array_bert):
             answers_dict[n_question][n_subquestion] = 0
 
     for n_question, question_dict in enumerate(res_dict[task]):
+        print(n_question)
         bert = False
         for n_subquestion, subquestion in enumerate(list(question_dict.values())[0]):
             name = 'question_{}_'.format(n_question) + 'subquestion_{}'.format(n_subquestion)
@@ -73,15 +74,19 @@ def create_element(element, bert):
     evidence = element['evidence']
     design = element['design']
     date = element['date']
-    if bert:
-        sentences = element['sentences']
-    else:
-        sentences = [element['sentences']]
+    sentences = element['sentences']
 
     new_element = '<div class="result-title-38e00bc3">' \
                   '<a href="' + url + '" target="_blank">' + title + '</a></div><p class="result-authors-38e00bc3">'
     new_element += authors + '</p><p class="result-date-38e00bc3">' + date + '</p><p class="result-text-38e00bc3">'
-    new_element += '<br>'.join(sentences)
+    if bert:
+        new_element += '<br>'.join(sentences)
+    else:
+        if type(sentences) == str:
+            new_element += '<br>' + sentences + '<br>'
+        else:
+            new_element += '<br>'.join(sentences)
+        
     new_element += '</p>'
 
     return new_element
