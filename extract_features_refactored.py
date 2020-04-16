@@ -431,7 +431,7 @@ class FeatureExtractor():
         """
         Returns a list of tuples (paragraph_id, paragraph_score) for "topk" paragraphs with the highest score.
         """
-        csv_filepath = os.path.join("Data/BERT_encodings", paper_id + '.csv')
+        csv_filepath = os.path.join("selected", paper_id + '.csv')
         df_article = pd.read_csv(csv_filepath, index_col=0)
  
         normalize = lambda x: x/np.linalg.norm(x, axis = 1, keepdims = True)
