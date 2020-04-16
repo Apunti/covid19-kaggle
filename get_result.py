@@ -82,7 +82,7 @@ def filtered_query(query):
     :param query: given text/abstract/paragraph <string>
     :return: list of strings
     """
-    query = " ".join(remove_punct(query.split()))
+    query = " ".join(remove_punct(query.split())).lower()
     stop_words = set(stopwords.words('english'))
     for term in ['et', 'al', 'also', 'fig']:
         stop_words.add(term)
