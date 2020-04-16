@@ -112,9 +112,9 @@ def get_answers_files(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = 
         ('TFIDF', instance 'Embedding_retrieval' from 'information_retrieval.py')
     """
     if not task is None:
-        directory = 'Data/json_answers/bert_v2/task_{}/'.format(task)
+        directory = 'json_answers/task_{}/'.format(task)
     else:
-        directory = 'Data/json_answers/test/'
+        directory = 'json_answers/test/'
     if not os.path.exists(directory):
         os.makedirs(directory)
 
