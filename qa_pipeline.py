@@ -38,7 +38,7 @@ def get_csv(df_path, csv_path, risk_factor, questions, top_k = 1):
     dataset = dataset.loc[dataset[risk_factor] & dataset.tag_disease_covid]
     print('Lenght of the cancer dataset: {}'.format(len(dataset)))
 
-    ranking = Ranking('texts')
+    ranking = Ranking('texts', path='../../input/ranking-dict')
     qa_model = pipeline('question-answering')
 
     print('All loaded')
