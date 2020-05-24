@@ -33,7 +33,7 @@ class Ranking:
         Computes the similarity between documents.
     """
 
-    def __init__(self, data='texts'):
+    def __init__(self, data='texts', path = 'Data/ranking_dict'):
         """
         :param data: whether you want to look through texts or articles. ('abstracts' or 'texts')
         """
@@ -42,32 +42,32 @@ class Ranking:
             raise Exception('The data parameter must be "texts" or "abstracts"')
 
         self.data = data
-        self._get_dictionaries()
+        self._get_dictionaries(path)
         self.num_documents = len(self.document_frequencies)
         self.ids = list(self.term_frequencies.keys())
 
-    def _get_dictionaries(self):
+    def _get_dictionaries(self, path):
         """
         loads the dictionaries needed to calculate the scoring functions.
         """
-
+        
         if self.data == 'abstracts':
-            with open('Data/ranking_dict/document_frequencies_abstract_v5.p', 'rb') as fp:
+            with open(path + '/document_frequencies_abstract_v5.p', 'rb') as fp:
                 self.document_frequencies = pickle.load(fp)
 
-            with open('Data/ranking_dict/term_frequencies_abstract_v5.p', 'rb') as fp:
+            with open(path + '/term_frequencies_abstract_v5.p', 'rb') as fp:
                 self.term_frequencies = pickle.load(fp)
 
-            with open('Data/ranking_dict/document_length_abstract_v5.p', 'rb') as fp:
+            with open(path + '/document_length_abstract_v5.p', 'rb') as fp:
                 self.document_length = pickle.load(fp)
         else:
-            with open('Data/ranking_dict/document_frequencies_text_v5.p', 'rb') as fp:
+            with open(path + '/document_frequencies_text_v5.p', 'rb') as fp:
                 self.document_frequencies = pickle.load(fp)
 
-            with open('Data/ranking_dict/term_frequencies_text_v5.p', 'rb') as fp:
+            with open(path + '/term_frequencies_text_v5.p', 'rb') as fp:
                 self.term_frequencies = pickle.load(fp)
 
-            with open('Data/ranking_dict/document_length_text_v5.p', 'rb') as fp:
+            with open(path + '/document_length_text_v5.p', 'rb') as fp:
                 self.document_length = pickle.load(fp)
 
         self.avg_length = mean(self.document_length.values())
