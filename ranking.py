@@ -153,7 +153,7 @@ class Ranking:
         :return: list of strings
         """
         if func == 'bm25':
-            scores = self.get_bm25_scores(query)
+            scores = self.get_bm25_scores(query, paper_ids=df.paper_id)
         else:
             scores = self.get_tfidf_scores(query)
         most_similar = sorted(scores.items(), key=lambda x:x[1], reverse=True)
