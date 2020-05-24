@@ -32,14 +32,14 @@ def get_documents(dataset, ranking, query, risk_factor, top_k = 10):
 
     return similar
 
-def get_csv(df_path, csv_path, risk_factor, questions, top_k = 1):
+def get_csv(df_path, csv_path, risk_factor, questions, top_k = 1, device = -1, dict_path = 'Data/ranking_dict'):
 
     dataset = pd.read_csv(df_path, sep=';')
     dataset = dataset.loc[dataset[risk_factor] & dataset.tag_disease_covid]
     print('Lenght of the cancer dataset: {}'.format(len(dataset)))
 
-    ranking = Ranking('texts', path='../../input/ranking-dict')
-    qa_model = pipeline('question-answering')
+    ranking = Ranking('texts', path= dict_path)
+    qa_model = pipeline('question-answering', device=device)
 
     print('All loaded')
 
