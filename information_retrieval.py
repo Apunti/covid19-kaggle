@@ -22,13 +22,13 @@ class Embedding_retrieval:
         else:
             self.embeddings = Embeddings(path=path)
 
-        with open('Data/ranking_dict/document_frequencies_text_v5.p', 'rb') as fp:
+        with open('Data/ranking_dict/document_frequencies_text_v8.p', 'rb') as fp:
             self.document_frequencies = pickle.load(fp)
 
-        with open('Data/ranking_dict/term_frequencies_text_v5.p', 'rb') as fp:
+        with open('Data/ranking_dict/term_frequencies_text_v8.p', 'rb') as fp:
             self.term_frequencies = pickle.load(fp)
 
-        with open('Data/ranking_dict/document_length_text_v5.p', 'rb') as fp:
+        with open('Data/ranking_dict/document_length_text_v8.p', 'rb') as fp:
             self.document_length = pickle.load(fp)
 
         self.num_documents = len(self.term_frequencies)

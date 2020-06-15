@@ -1,4 +1,4 @@
-name: base
+name: covid
 channels:
   - h2oai
   - conda-forge/label/cf202003
