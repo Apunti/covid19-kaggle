@@ -107,7 +107,7 @@ def remove_punct(text):
         new_words.append(w)
     return new_words
 
-def get_answers_files(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = None, inforet_sentence = None, only_top_doc = False, task = None, question = None, subquestion = None, method = 'BERT'):
+def get_answers_files(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = None, inforet_sentence = None, only_top_doc = False, task = None, question = None, subquestion = None, method = 'BERT', encodings_dict = None):
     """
     'inforet_tuple' is a tuple (information_retrieval_type, information_retrieval_instance), eg:
         ('BERT', instance of 'FeatureExtractor' from 'extract_features_refactored.py' )
@@ -144,7 +144,7 @@ def get_answers_files(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = 
         # get 'topk' closest sentences/paragraphs
         if (inforet_type == 'BERT'):
             try:
-                similar_par = inforet.get_closest_sentence(bert_query, paper_id, row.text.values[0], par_k)
+                similar_par = inforet.get_closest_sentence(bert_query, paper_id, row.text.values[0], par_k, encodings_dict = encodings_dict)
             except:
                 continue
             top_paragraphs = ''
