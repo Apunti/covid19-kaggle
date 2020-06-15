@@ -336,17 +336,18 @@ def squad_create_answer_files(df, dictionary, res_dict, n_task):
         os.makedirs(directory)
         
     for n_question, question_dict in enumerate(res_dict[tasks[n_task]]):
+        
         for n_subquestion, subquestion in enumerate(list(question_dict.values())[0]):
-        
-        name = 'question_{}_'.format(n_question) + 'subquestion_{}'.format(n_subquestion)
-        path = directory + name + '.json'
-        
-        output_dict = []
-        for paper_id in dictionary[n_question][n_subquestion].keys():
-            row = df[df.paper_id == paper_id]
-            actual_dict = get_dictionary(row)
-            actual_dict['sentences'] = dictionary[n_question][n_subquestion][paper_id]
-            output_dict.append(actual_dict)
-        
-        with open(path, 'w') as outfile:
-            json.dump(output_dict, outfile)
+
+            name = 'question_{}_'.format(n_question) + 'subquestion_{}'.format(n_subquestion)
+            path = directory + name + '.json'
+
+            output_dict = []
+            for paper_id in dictionary[n_question][n_subquestion].keys():
+                row = df[df.paper_id == paper_id]
+                actual_dict = get_dictionary(row)
+                actual_dict['sentences'] = dictionary[n_question][n_subquestion][paper_id]
+                output_dict.append(actual_dict)
+
+            with open(path, 'w') as outfile:
+                json.dump(output_dict, outfile)
