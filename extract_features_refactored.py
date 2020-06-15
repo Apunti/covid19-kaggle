@@ -29,7 +29,7 @@ import os
 
 import biobert.modeling as modeling
 import biobert.tokenization as tokenization
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 
 import numpy as np
 import pandas as pd
