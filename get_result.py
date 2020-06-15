@@ -16,7 +16,7 @@ def get_ranking_nearest(query, ranking, df, doc_k):
     ranking_nearest = [a for a, b in sorted_paper_id][:doc_k]  # Ranking function nearest
     return ranking_nearest
     
-def get_result(df, query, ranking, inforet_tuple, doc_k = 5, sent_k = 3):
+def get_result(df, query, ranking, inforet_tuple, doc_k = 5, sent_k = 3, encodings_dict = None):
     """
     'inforet_tuple' is a tuple (information_retrieval_type, information_retrieval_instance), eg:
         ('BERT', instance of 'FeatureExtractor' from 'extract_features_refactored.py' )
@@ -41,7 +41,7 @@ def get_result(df, query, ranking, inforet_tuple, doc_k = 5, sent_k = 3):
             continue
             
         # get 'topk' closest sentences/paragraphs
-        similar_sent = inforet.get_closest_sentence(query, paper_id, row.text.values[0], topk=10)
+        similar_sent = inforet.get_closest_sentence(query, paper_id, row.text.values[0], topk=10, encodings_dict = encodings_dict)
                         
         for sent, sim in similar_sent:
             actual_doc.append((paper_id, sent, sim))
