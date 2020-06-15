@@ -275,3 +275,78 @@ def get_level_evidence(row):
     return 'None'
 
     return 'None'
+
+def get_top_paragraphs(df, query, ranking, inforet_tuple, doc_k, sent_k, par_k = None, inforet_sentence = None, only_top_doc = False, task = None, question = None, subquestion = None, method = 'BERT', encodings_dict = None):
+    """
+    'inforet_tuple' is a tuple (information_retrieval_type, information_retrieval_instance), eg:
+        ('BERT', instance of 'FeatureExtractor' from 'extract_features_refactored.py' )
+        ('TFIDF', instance 'Embedding_retrieval' from 'information_retrieval.py')
+    """
+
+    query = filtered_query(query)
+    ranking_nearest = get_ranking_nearest(query, ranking, df, doc_k)
+    # provide additional preprocessingfor BERT
+    if (len(inforet_tuple) == 2):
+        (inforet_type, inforet) = inforet_tuple
+        if (inforet_type == 'BERT'):
+            bert_query = inforet.prepare_embedding_csv(query, None, False).values
+            #print('query processed')
+    else:
+        inforet = inforet_tuple
+
+    #print('Ranking processed')
+
+    # get the list of tuples (paper_id, sentence, similarity) for "topk" sentences
+    doc_info = {}
+    for paper_id in ranking_nearest:
+        actual_doc = []
+        row = df.loc[df.paper_id == paper_id]
+        if len(row.text.values) == 0 or not row['after_dec'].values[0]:
+            continue
+
+        # get 'topk' closest sentences/paragraphs
+        if (inforet_type == 'BERT'):
+            try:
+                similar_par = inforet.get_closest_sentence(bert_query, paper_id, row.text.values[0], par_k, encodings_dict = encodings_dict)
+            except:
+                continue
+            top_paragraphs = ''
+            for n_par in range(par_k):
+                if len(similar_par) < par_k:
+                    print('DOC TOO SHORT')
+                    continue
+                top_paragraphs += similar_par[n_par][0] + '\n'
+        else:
+            raise ('This method is only for BERT my friend!')
+        
+        doc_info[paper_id] = top_paragraphs
+        
+    return doc_info
+
+def squad_create_answer_files(df, dictionary, res_dict, n_task):
+    """
+    Dictionary: dictionary with keys: n_question -> n_subquestion -> paper_id -> answer
+    """
+    
+    if not task is None:
+        directory = 'json_answers/' + method + '/task_{}/'.format(n_task)
+    else:
+        directory = 'json_answers/test/'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        
+    for n_question, question_dict in enumerate(res_dict[tasks[n_task]]):
+        for n_subquestion, subquestion in enumerate(list(question_dict.values())[0]):
+        
+        name = 'question_{}_'.format(n_question) + 'subquestion_{}'.format(n_subquestion)
+        path = directory + name + '.json'
+        
+        output_dict = []
+        for paper_id in dictionary[n_question][n_subquestion].keys():
+            row = df[df.paper_id == paper_id]
+            actual_dict = get_dictionary(row)
+            actual_dict['sentences'] = dictionary[n_question][n_subquestion][paper_id]
+            output_dict.append(actual_dict)
+        
+        with open(path, 'w') as outfile:
+            json.dump(output_dict, outfile)
