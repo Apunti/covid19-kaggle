@@ -427,16 +427,20 @@ class FeatureExtractor():
         return np.divide(embedding_vector, number_of_tokens)
     
     
-    def get_closest_sentence(self, query_emb_init, paper_id, text, topk=10):  
+    def get_closest_sentence(self, query_emb_init, paper_id, text, topk=10, encodings_dict = None):  
         """
         Returns a list of tuples (paragraph_id, paragraph_score) for "topk" paragraphs with the highest score.
         """
-        csv_filepath = os.path.join("selected", paper_id + '.csv')
-        df_article = pd.read_csv(csv_filepath, index_col=0)
+        if encodings_dict is None:
+            csv_filepath = os.path.join("Data/BERT_encodings", paper_id + '.csv')
+            df_article = pd.read_csv(csv_filepath, index_col=0)
+            df_article = df_article.values
+        else:
+            df_article = encodings_dict[paper_id]            
  
         normalize = lambda x: x/np.linalg.norm(x, axis = 1, keepdims = True)
         query_emb = normalize(query_emb_init)
-        val_norm = normalize(df_article.values)
+        val_norm = normalize(df_article)
         score_arr = safe_sparse_dot(val_norm, query_emb.T)
 
         # sort in decreasing order
