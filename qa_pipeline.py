@@ -32,9 +32,9 @@ def get_documents(dataset, ranking, query, top_k = 10):
 
     return similar
 
-def get_csv(df_path, csv_path, risk_factor, questions, top_k = 1, device = -1, dict_path = 'Data/ranking_dict'):
+def get_csv(df, csv_path, risk_factor, questions, top_k = 1, device = -1, dict_path = 'Data/ranking_dict'):
 
-    dataset = pd.read_csv(df_path, sep=';')
+    dataset = df #pd.read_csv(df_path, sep=';')
 
     ranking = Ranking('texts', path= dict_path)
     qa_model = pipeline('question-answering', device=device)
