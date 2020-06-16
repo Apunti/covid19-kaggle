@@ -7,43 +7,55 @@ def get_answer_from_doc(query, doc, qa_model):
 
     output = []
     
-    seq_length = 384
-    stride = 128
+    seq_length = 250
+    stride = 150
     splitted_doc = doc.split(' ')
     
+    i = 0
     while len(splitted_doc) > seq_length:
+        print('Paragraph {}'.format(i), end='')
+        i += 1
         paragraph = ' '.join(splitted_doc[:seq_length])
-        input = {'question': query,
+        m_input = {'question': query,
                  'context': paragraph}
-        print('processing paragraph...', end= '')
-        output_dict = qa_model(input)
+        try:
+            output_dict = qa_model(m_input)
+        except:
+            print('### QUESTION ###')
+            print(m_input['question'])
+            print('### CONTEXT ###')
+            print(m_input['context'])
+            print(splitted_doc[:seq_length])
+            raise
         answer = output_dict['answer']
         score = output_dict['score']
 
-        output.append((answer, score))
+        output.append((answer, score, paragraph))
         
         splitted_doc = splitted_doc[stride:]
         
     if len(splitted_doc) > 127:
         
-            paragraph = ' '.join(splitted_doc)
-        input = {'question': query,
+        paragraph = ' '.join(splitted_doc)
+        m_input = {'question': query,
                  'context': paragraph}
         print('processing paragraph...', end= '')
-        output_dict = qa_model(input)
+        output_dict = qa_model(m_input)
         answer = output_dict['answer']
         score = output_dict['score']
 
-        output.append((answer, score))
+        output.append((answer, score, paragraph))
     
     sorted_output = sorted(output, key=lambda x: x[1], reverse=True)
+    
+    print('### ANSWER ###')
+    print(sorted_output[0])
 
-    if sorted_output[0][1] > 0.4:
-        return sorted_output[0][0]
+    if sorted_output[0][1] > 0.3:
+        return sorted_output[0][0], sorted_output[0][2]
     else:
-        return '-'
-
-
+        return '-', sorted_output[0][2]
+    
 def get_documents(dataset, ranking, query, top_k = 10):
 
     similar = ranking.most_similar(query, dataset, k = top_k, func='bm25', data='text')
@@ -51,12 +63,29 @@ def get_documents(dataset, ranking, query, top_k = 10):
 
     return similar
 
+def get_information(row):
+    date = row['date'].values[0]
+    url = row['url'].values[0]
+    authors = row['authors'].values[0]
+    title = row['title'].values[0]
+    design = get_design(row)
+    level_of_evidence = get_level_evidence(row)
+    
+    new_line = {'date': date,
+                'title': '<a href="' + url + '">' + title + '</a>',
+                'authors': authors,
+                'design': design,
+                'level_of_evidence': level_of_evidence}
+    
+    return new_line
+    
+
 def get_csv(df, csv_path, risk_factor, questions, top_k = 1, device = -1, dict_path = 'Data/ranking_dict'):
 
     dataset = df #pd.read_csv(df_path, sep=';')
 
     ranking = Ranking('texts', path= dict_path)
-    qa_model = pipeline('question-answering', device=device)
+    qa_model = pipeline('question-answering', device=device, model='bert-large-uncased-whole-word-masking-finetuned-squad')
 
     print('All loaded')
 
@@ -64,49 +93,18 @@ def get_csv(df, csv_path, risk_factor, questions, top_k = 1, device = -1, dict_p
     documents = get_documents(dataset, ranking, all_query, top_k = top_k)
     print('Length documents: {}'.format(len(documents)))
 
-    results = pd.DataFrame(columns=['paper_id'] + questions)
+    results = pd.DataFrame(columns=['date', 'title', 'authors', 'design', 'level_of_evidence'] + questions)
 
-    print('Starting docs: \n')
+    print('Starting docs for {}: \n'.format(risk_factor))
 
     for doc in documents:
-        print('NEW DOC')
-        paper_id = dataset.loc[dataset.text == doc].paper_id.values[0]
-        new_line = {'paper_id': paper_id}
+        row = dataset.loc[dataset.text == doc]
+        new_line = get_information(row)
+        #new_line = {'paper_id': paper_id}
         for query in questions:
-            answer = get_answer_from_doc(query, doc, qa_model)
-            new_line[query] = answer
+            answer, paragraph = get_answer_from_doc(query, doc, qa_model)
+            new_line[query] = str(paragraph.replace(answer, f"<mark>{answer}</mark>")) 
             print(answer)
         results = results.append(new_line, ignore_index=True)
-        print(results)
-
-    print(results)
+        
     results.to_csv(csv_path, sep=';', index=False)
-
-
-if __name__ == '__main__':
-    factor = 'cancer'
-    questions2 = ['What is the severity of ' + factor,
-                  'What is the fatality of ' + factor,
-                  'What is the study population',
-                  'Which type of study is it',
-                  'Sample size of the study']
-    questions = ['Study Type',
-                 'Severity of ' + factor,
-                 'Severity lower bound of ' + factor,
-                 'Severity upper bound of ' + factor,
-                 'Severity p-value of ' + factor,
-                 'Severe significance of ' + factor,
-                 'Severe adjusted of ' + factor,
-                 'Hand-calculated Severe of ' + factor,
-                 'Fatality of ' + factor,
-                 'Fatality lower bound of ' + factor,
-                 'Fatality upper bound of ' + factor,
-                 'Fatality p-value of ' + factor,
-                 'Fatality significance of ' + factor,
-                 'Fatality adjusted of ' + factor,
-                 'Hand-calculated Fatality of ' + factor,
-                 'Multivariate adjustment of ' + factor,
-                 'Sample size',
-                 'Study population']
-    get_csv('Data/processed_data_v6.csv', 'csv/test3.csv', 'risk_factor_' + factor, questions)
-
