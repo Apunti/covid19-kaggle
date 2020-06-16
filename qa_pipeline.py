@@ -12,7 +12,7 @@ def get_answer_from_doc(query, doc, qa_model):
     splitted_doc = doc.split(' ')
     
     while len(splitted_doc) > seq_length:
-        paragraph = splitted_doc[:seq_length]
+        paragraph = ' '.join(splitted_doc[:seq_length])
         input = {'question': query,
                  'context': paragraph}
         print('processing paragraph...', end= '')
@@ -26,7 +26,7 @@ def get_answer_from_doc(query, doc, qa_model):
         
     if len(splitted_doc) > 127:
         
-        paragraph = splitted_doc
+            paragraph = ' '.join(splitted_doc)
         input = {'question': query,
                  'context': paragraph}
         print('processing paragraph...', end= '')
