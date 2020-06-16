@@ -36,18 +36,6 @@ def get_answer_from_doc(query, doc, qa_model):
 
         output.append((answer, score))
     
-"""
-    for paragraph in doc.strip().split('/n'):
-        input = {'question': query,
-                 'context': paragraph}
-        print('processing paragraph...', end= '')
-        output_dict = qa_model(input)
-        answer = output_dict['answer']
-        score = output_dict['score']
-
-        output.append((answer, score))
-"""
-
     sorted_output = sorted(output, key=lambda x: x[1], reverse=True)
 
     if sorted_output[0][1] > 0.4:
