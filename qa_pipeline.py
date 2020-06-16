@@ -14,20 +14,18 @@ def get_answer_from_doc(query, doc, qa_model):
     
     i = 0
     while len(splitted_doc) > seq_length:
-        print('Paragraph {}'.format(i), end='')
-        i += 1
         paragraph = ' '.join(splitted_doc[:seq_length])
         m_input = {'question': query,
                  'context': paragraph}
         try:
             output_dict = qa_model(m_input)
         except:
-            print('### QUESTION ###')
-            print(m_input['question'])
-            print('### CONTEXT ###')
-            print(m_input['context'])
-            print(splitted_doc[:seq_length])
-            raise
+            if i!=0:
+                splitted_doc = splitted_doc[stride:]
+                i = 0
+            i += i
+            continue
+        i = 0
         answer = output_dict['answer']
         score = output_dict['score']
 
