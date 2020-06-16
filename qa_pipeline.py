@@ -25,7 +25,7 @@ def get_answer_from_doc(query, doc, qa_model):
         return '-'
 
 
-def get_documents(dataset, ranking, query, risk_factor, top_k = 10):
+def get_documents(dataset, ranking, query, top_k = 10):
 
     similar = ranking.most_similar(query, dataset, k = top_k, func='bm25', data='text')
     print('similar length: {}'.format(len(similar)))
@@ -35,8 +35,6 @@ def get_documents(dataset, ranking, query, risk_factor, top_k = 10):
 def get_csv(df_path, csv_path, risk_factor, questions, top_k = 1, device = -1, dict_path = 'Data/ranking_dict'):
 
     dataset = pd.read_csv(df_path, sep=';')
-    dataset = dataset.loc[dataset[risk_factor] & dataset.tag_disease_covid]
-    print('Lenght of the cancer dataset: {}'.format(len(dataset)))
 
     ranking = Ranking('texts', path= dict_path)
     qa_model = pipeline('question-answering', device=device)
@@ -44,7 +42,7 @@ def get_csv(df_path, csv_path, risk_factor, questions, top_k = 1, device = -1, d
     print('All loaded')
 
     all_query = ' '.join(questions)
-    documents = get_documents(dataset, ranking, all_query, risk_factor, top_k = top_k)
+    documents = get_documents(dataset, ranking, all_query, top_k = top_k)
     print('Length documents: {}'.format(len(documents)))
 
     results = pd.DataFrame(columns=['paper_id'] + questions)
