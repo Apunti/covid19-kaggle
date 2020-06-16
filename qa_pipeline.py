@@ -6,7 +6,37 @@ import pandas as pd
 def get_answer_from_doc(query, doc, qa_model):
 
     output = []
+    
+    seq_length = 384
+    stride = 128
+    splitted_doc = doc.split(' ')
+    
+    while len(splitted_doc) > seq_length:
+        paragraph = splitted_doc[:seq_length]
+        input = {'question': query,
+                 'context': paragraph}
+        print('processing paragraph...', end= '')
+        output_dict = qa_model(input)
+        answer = output_dict['answer']
+        score = output_dict['score']
 
+        output.append((answer, score))
+        
+        splitted_doc = splitted_doc[stride:]
+        
+    if len(splitted_doc) > 127:
+        
+        paragraph = splitted_doc
+        input = {'question': query,
+                 'context': paragraph}
+        print('processing paragraph...', end= '')
+        output_dict = qa_model(input)
+        answer = output_dict['answer']
+        score = output_dict['score']
+
+        output.append((answer, score))
+    
+"""
     for paragraph in doc.strip().split('/n'):
         input = {'question': query,
                  'context': paragraph}
@@ -16,6 +46,7 @@ def get_answer_from_doc(query, doc, qa_model):
         score = output_dict['score']
 
         output.append((answer, score))
+"""
 
     sorted_output = sorted(output, key=lambda x: x[1], reverse=True)
 
