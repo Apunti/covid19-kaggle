@@ -20,18 +20,21 @@ def get_answer_from_doc(query, doc, qa_model):
         try:
             output_dict = qa_model(m_input)
         except:
+            print('### i = {} ###'.format(i))
+            print('### CONTEXT ###')
+            print(m_input['context'])
             if i!=0:
                 splitted_doc = splitted_doc[stride:]
                 i = 0
             i += i
             continue
-        i = 0
         answer = output_dict['answer']
         score = output_dict['score']
 
         output.append((answer, score, paragraph))
         
         splitted_doc = splitted_doc[stride:]
+        i = 0
         
     if len(splitted_doc) > 127:
         
