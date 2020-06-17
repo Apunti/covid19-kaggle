@@ -26,7 +26,7 @@ def get_answer_from_doc(query, doc, qa_model):
             if i!=0:
                 splitted_doc = splitted_doc[stride:]
                 i = 0
-            i += i
+            i += 1
             continue
         answer = output_dict['answer']
         score = output_dict['score']
