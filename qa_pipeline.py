@@ -33,6 +33,7 @@ def get_answer_from_doc(query, doc, qa_model):
         splitted_doc = splitted_doc[stride:]
         i = 0
         
+    error = False    
     if len(splitted_doc) > 127:
         
         paragraph = ' '.join(splitted_doc)
@@ -42,16 +43,15 @@ def get_answer_from_doc(query, doc, qa_model):
         try:
             output_dict = qa_model(m_input)
         except:
-            if i!=0:
-                splitted_doc = splitted_doc[stride:]
-                i = 0
-            i += 1
-            continue
-        answer = output_dict['answer']
-        score = output_dict['score']
-        i = 0
+            error = True
+            pass
+        if error:
+            error = False
+        else:
+            answer = output_dict['answer']
+            score = output_dict['score']
         
-        output.append((answer, score, paragraph))
+            output.append((answer, score, paragraph))
     
     sorted_output = sorted(output, key=lambda x: x[1], reverse=True)
     
