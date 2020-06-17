@@ -39,10 +39,18 @@ def get_answer_from_doc(query, doc, qa_model):
         m_input = {'question': query,
                  'context': paragraph}
         print('processing paragraph...', end= '')
-        output_dict = qa_model(m_input)
+        try:
+            output_dict = qa_model(m_input)
+        except:
+            if i!=0:
+                splitted_doc = splitted_doc[stride:]
+                i = 0
+            i += 1
+            continue
         answer = output_dict['answer']
         score = output_dict['score']
-
+        i = 0
+        
         output.append((answer, score, paragraph))
     
     sorted_output = sorted(output, key=lambda x: x[1], reverse=True)
